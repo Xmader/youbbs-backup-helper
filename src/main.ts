@@ -23,6 +23,8 @@ interface Options {
     types?: BackupType[];
     startId?: number;
     maxId?: number;
+    /** 最大并发数 */
+    maxConcurrent?: number;
 }
 
 export const main = async ({
@@ -32,6 +34,7 @@ export const main = async ({
     types = AllBackupTypes,
     startId = 1,
     maxId = Infinity,
+    maxConcurrent = 20,
 }: Options) => {
 
     const serializerFn = Serializers[serializer].serialize
@@ -43,30 +46,49 @@ export const main = async ({
         const urlpart = TypeUrlParts[type]
         const parser = PageParsers[type]
 
+        let clist = []
+
         for (let id = startId; id <= maxId; id++) {
             const url = `${baseURL}/${urlpart}/${id}`
 
-            console.log(url)
+            if (clist.length > maxConcurrent) {
+                const results = await Promise.all(clist.map(f => f()))
+                clist = []
 
-            try {
-                const r = await fetchMainContent(url)
-                const pageObj = await parser.parse(r)
-
-                const output = serializerFn(pageObj)
-
-                await ensureDir(jsonPaths(outputDir, type))
-                await writeFile(jsonPaths(outputDir, type, `${id}.${fileExt}`), output)
-
-            } catch (err) {
-                if (err.message && err.message == "no more pages") {
+                const ends = results.some((x) => x)
+                if (ends) {
                     break
-                } else {
-                    console.error(err)
                 }
             }
-        }
-    }
 
+            clist.push(async () => {
+                console.log(url, "processing")
+
+                try {
+                    const r = await fetchMainContent(url)
+                    const pageObj = await parser.parse(r)
+
+                    const output = serializerFn(pageObj)
+
+                    await ensureDir(jsonPaths(outputDir, type))
+                    await writeFile(jsonPaths(outputDir, type, `${id}.${fileExt}`), output)
+
+                    console.log(url, "finished")
+
+                } catch (err) {
+                    if (err.message && err.message == "no more pages") {
+                        console.error(url, "not found")
+                        return true
+                    } else {
+                        console.error(url, err)
+                    }
+                }
+            })
+
+        }
+
+        await Promise.all(clist.map(f => f()))
+    }
 }
 
 export default main
