@@ -146,10 +146,8 @@ export const CategoryPageParser: MainContentParser<Category> = {
         const firstCategoryA: HTMLAnchorElement = mainContentElement.querySelector(".item-date > a")
         const cid = getIdFromLink(firstCategoryA.href, "n")
 
-        const nameA: HTMLAnchorElement = mainContentElement.querySelector(".float-left > a")
-        const name = nameA.text
-
-        // const name = document.querySelector("meta[name=keywords]").content
+        const document = mainContentElement.getRootNode() as Document
+        const name = (document.querySelector("meta[name=keywords]") as HTMLMetaElement).content
         // const desc = document.querySelector("meta[name=description]").content
 
         // 获取分类描述，可能不存在
