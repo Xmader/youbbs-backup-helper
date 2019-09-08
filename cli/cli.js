@@ -47,7 +47,7 @@ const argv = require("yargs").options({
 
 const BackupHelper = require("..")
 
-BackupHelper({
+new BackupHelper({
     baseURL: argv["base-url"],
     outputDir: argv["output-dir"],
     // @ts-ignore
@@ -57,4 +57,4 @@ BackupHelper({
     startId: argv["start-id"],
     maxId: argv["max-id"],
     maxConcurrent: argv["max-concurrent"],
-})
+}).start()
