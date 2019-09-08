@@ -7,6 +7,8 @@ import { join as jsonPaths } from "path"
 type BackupType = keyof typeof PageParsers
 const AllBackupTypes = Object.keys(PageParsers) as BackupType[]
 
+type SerializerName = keyof typeof Serializers
+
 /**
  * url: `/<type>/<id>`
  */
@@ -19,7 +21,7 @@ const TypeUrlParts: { [type in BackupType]: string } = {
 interface Options {
     baseURL: string;
     outputDir: string;
-    serializer?: "json" | "yaml" | "markdown";
+    serializer?: SerializerName;
     types?: BackupType[];
     startId?: number;
     maxId?: number;
@@ -27,7 +29,7 @@ interface Options {
     maxConcurrent?: number;
 }
 
-export const main = async ({
+const BackupHelper = async ({
     baseURL,
     outputDir,
     serializer = "json",
@@ -91,4 +93,4 @@ export const main = async ({
     }
 }
 
-export default main
+export = BackupHelper

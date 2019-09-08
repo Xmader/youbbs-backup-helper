@@ -1,0 +1,41 @@
+{
+    "name": "youbbs-backup-helper",
+    "version": "1.0.0",
+    "description": "Backup youBBS sites easily",
+    "main": "dist/main.js",
+    "module": "src/main.ts",
+    "bin": {
+        "youbbs-backup-helper": "./cli/cli.js"
+    },
+    "dependencies": {
+        "fs-extra": "^8.1.0",
+        "js-yaml": "^3.13.1",
+        "jsdom": "^15.1.1",
+        "node-fetch": "^2.6.0",
+        "turndown": "^5.0.3",
+        "yargs": "^14.0.0"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^8.0.0",
+        "@types/js-yaml": "^3.12.1",
+        "@types/jsdom": "^12.2.4",
+        "@types/node-fetch": "^2.5.0",
+        "@types/turndown": "^5.0.0",
+        "@types/yargs": "^13.0.2",
+        "typescript": "^3.6.2"
+    },
+    "scripts": {
+        "install": "npm run build",
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Xmader/youbbs-backup-helper.git"
+    },
+    "author": "Xmader",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Xmader/youbbs-backup-helper/issues"
+    },
+    "homepage": "https://github.com/Xmader/youbbs-backup-helper#readme"
+}
