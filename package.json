@@ -1,6 +1,6 @@
 {
     "name": "youbbs-backup-helper",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "description": "Backup youBBS sites easily",
     "main": "dist/main.js",
     "module": "src/main.ts",
@@ -26,7 +26,8 @@
     },
     "scripts": {
         "install": "npm run build",
-        "build": "tsc"
+        "build": "tsc",
+        "watch": "tsc --watch"
     },
     "repository": {
         "type": "git",

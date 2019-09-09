@@ -3,7 +3,7 @@ import { fetchMainContent } from "./utils"
 import { Serializers } from "./serialization"
 import { PageObj } from "./types"
 import { writeFile, ensureDir } from "fs-extra"
-import { join as jsonPaths } from "path"
+import { join as joinPaths, dirname } from "path"
 
 type BackupType = keyof typeof PageParsers
 const AllBackupTypes = Object.keys(PageParsers) as BackupType[]
@@ -38,47 +38,29 @@ class BackupHelper {
 
     private opts: Options;
 
-    private pipeFnList: PipeFn[];
+    private pipeFnList: PipeFn[] = [];
 
     private fileNameFn?: FileNameFn;
 
-    constructor({
-        baseURL,
-        outputDir,
-        serializer = "json",
-        types = AllBackupTypes,
-        startId = 1,
-        maxId = Infinity,
-        maxConcurrent = 20,
-    }: Options) {
-
-        this.opts = {
-            baseURL,
-            outputDir,
-            serializer,
-            types,
-            startId,
-            maxId,
-            maxConcurrent,
-        }
-
-    }
-
-    /**
-     * 在解析页面和序列化之间运行，修改 pageObj  
-     * 可以添加多个，顺序运行
-     */
-    pipe(fn: PipeFn) {
-        this.pipeFnList.push(fn)
+    constructor(opts: Options) {
+        this.opts = opts
     }
 
     /**
      * 设置输出的文件名为函数的返回值  
      * 否则为 `${id}.${fileExt}` 格式  
-     * 函数在 pipeFn 之后运行
+     * 函数在解析页面之后，pipeFn 之前运行
      */
     setFileNameFn(fn: FileNameFn) {
         this.fileNameFn = fn
+    }
+
+    /**
+     * 在获取文件名(如果有)和序列化之间运行，修改 pageObj  
+     * 可以添加多个，顺序运行
+     */
+    pipe(fn: PipeFn) {
+        this.pipeFnList.push(fn)
     }
 
     async start() {
@@ -86,11 +68,11 @@ class BackupHelper {
         const {
             baseURL,
             outputDir,
-            serializer,
-            types,
-            startId,
-            maxId,
-            maxConcurrent,
+            serializer = "json",
+            types = AllBackupTypes,
+            startId = 1,
+            maxId = Infinity,
+            maxConcurrent = 20,
         } = this.opts
 
         const serializerFn = Serializers[serializer].serialize
@@ -124,19 +106,20 @@ class BackupHelper {
                         const r = await fetchMainContent(url)
                         let pageObj = await parser.parse(r)
 
-                        for (const pipeFn of this.pipeFnList) {
-                            pageObj = await pipeFn(pageObj)
-                        }
-
                         let fileName = `${id}.${fileExt}`
                         if (this.fileNameFn && typeof this.fileNameFn == "function") {
                             fileName = await this.fileNameFn(pageObj, id, fileExt)
                         }
+                        const outputPath = joinPaths(outputDir, type, fileName)
+
+                        for (const pipeFn of this.pipeFnList) {
+                            pageObj = await pipeFn(pageObj)
+                        }
 
                         const output = serializerFn(pageObj)
 
-                        await ensureDir(jsonPaths(outputDir, type))
-                        await writeFile(jsonPaths(outputDir, type, fileName), output)
+                        await ensureDir(dirname(outputPath))
+                        await writeFile(outputPath, output)
 
                         console.log(url, "finished")
 

@@ -85,9 +85,11 @@ export const CommentParser: Parser<Comment> = {
 export const ArticlePageParser: MainContentParser<Article> = {
     parse(mainContentElement): Article {
 
+        const document = mainContentElement.getRootNode() as Document
+
         // 获取 Article id, 取巧的方法，不保证长期可用
         // 这个 <script> 标签中脚本的作用是追踪链接点击数，会向这个文章的 url 发送一个 POST 请求 
-        const linkclickCbScript = mainContentElement.querySelectorAll("script")[1]
+        const linkclickCbScript = [...mainContentElement.querySelectorAll("script")].slice(-1)[0]
         const aid = getIdFromLink(linkclickCbScript.text, "t")
 
         const categoryA: HTMLAnchorElement = mainContentElement.querySelector(".fs14 > a:nth-child(2)")
@@ -102,21 +104,20 @@ export const ArticlePageParser: MainContentParser<Article> = {
         const addTime = getTime(metaDiv.innerHTML)
 
         const contentContainer = mainContentElement.querySelector(".topic-content")
+        const cDiv = contentContainer.querySelector(".c")
         const tagsDiv = contentContainer.querySelector(".mytag")
 
         const contentContainerChildren = [...contentContainer.children]
-        const tagsDivIndex = contentContainerChildren.indexOf(tagsDiv)
+        const contentNextDivIndex = tagsDiv ? contentContainerChildren.indexOf(tagsDiv) : contentContainerChildren.indexOf(cDiv)
 
-        const contentDivs = contentContainerChildren.slice(0, tagsDivIndex)
+        const contentDivs = contentContainerChildren.slice(0, contentNextDivIndex)
         const content = contentDivs.map((div) => {
             removeLinkTimeDots(div)
             return div.outerHTML
         }).join("\n")
 
-        const tagAList = tagsDiv.querySelectorAll("a")
-        const tags: Tag[] = [...tagAList].map((tagA) => {
-            return tagA.text
-        })
+        const keywords = (document.querySelector("meta[name=keywords]") as HTMLMetaElement).content
+        const tags: Tag[] = keywords ? keywords.split(",") : []
 
         const commentItemDivList = mainContentElement.querySelectorAll(".main-box > .commont-item")
 

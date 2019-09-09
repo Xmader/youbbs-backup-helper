@@ -38,7 +38,7 @@ youbbs-backup-helper --help
 ```js
 const youbbsBackupHelper = require("youbbs-backup-helper")
 
-youbbsBackupHelper({
+new youbbsBackupHelper({
     baseURL: "https://www.youbbs.org",
     outputDir: "dist",
     types: ["article", "user", "category"],
@@ -46,10 +46,10 @@ youbbsBackupHelper({
     maxId: Infinity,
     serializer: "markdown",
     maxConcurrent: 50,
-})
+}).start()
 ```
 
-[详细 API](src/main.ts#L21)
+[详细 API](src/main.ts#L37)
 
 ## License
 
