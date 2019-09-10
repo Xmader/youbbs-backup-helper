@@ -53,6 +53,7 @@ class BackupHelper {
      */
     setFileNameFn(fn: FileNameFn) {
         this.fileNameFn = fn
+        return this
     }
 
     /**
@@ -61,6 +62,7 @@ class BackupHelper {
      */
     pipe(fn: PipeFn) {
         this.pipeFnList.push(fn)
+        return this
     }
 
     async start() {
