@@ -65,14 +65,14 @@ export const fetchDOM = async (url: RequestInfo, init?: RequestInit) => {
     const r = await fetch(url, init)
     const html = await r.text()
 
+    if (html == "key_not_found") {  // 页面不存在 (从未存在), 后续应该没有页面了
+        throw Error("no more pages")
+    }
+
     if (!r.ok) {  // 页面已被删除或没有权限访问
         // if (html == '{"retcode":404,"retmsg":"not found"}') {
         throw Error("page deleted")
         // }
-    }
-
-    if (html == "key_not_found") {  // 页面不存在 (从未存在), 后续应该没有页面了
-        throw Error("no more pages")
     }
 
     const document = new CrossDOMParser().parseFromString(html)
