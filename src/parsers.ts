@@ -2,7 +2,7 @@
 import { Parser, MainContentParser, User, Article, Comment, Tag, Category } from "./types"
 import { parseTime, fetchDataURL } from "./utils"
 
-const timeReg = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2})/
+const timeReg = /(\d{4}-\d{2}-\d{2})/
 const userNoReg = /第(\d+)号会员/
 
 const getUserNo = (str: string) => {
@@ -10,7 +10,7 @@ const getUserNo = (str: string) => {
 }
 
 const getTime = (str: string) => {
-    const timeStr = str.match(timeReg)[1]
+    const timeStr = str.match(timeReg)[1] + " 00:00"
     return parseTime(timeStr)
 }
 
