@@ -1,6 +1,6 @@
 {
     "name": "youbbs-backup-helper",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "description": "Backup youBBS sites easily",
     "main": "dist/main.js",
     "module": "src/main.ts",
