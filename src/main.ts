@@ -95,7 +95,7 @@ class BackupHelper {
                     console.log(url, "processing")
 
                     try {
-                        const r = await fetchMainContent(url)
+                        const r = await fetchMainContent(url, { timeout: 5 * 1000 })
                         let pageObj = await parser.parse(r)
 
                         let fileName = `${id}.${fileExt}`

@@ -47,7 +47,7 @@ export const UserPageParser: MainContentParser<User> = {
 
         const baseURLL: HTMLLinkElement = (mainContentElement.getRootNode() as Document).querySelector("link[rel=canonical]")
         const baseURL = baseURLL.href.replace(/\/+$/, "")
-        const avatarDataUrl = await fetchDataURL(baseURL + avatarUrl)
+        const avatarDataUrl = await fetchDataURL(baseURL + avatarUrl, { timeout: 5 * 1000 })
 
         return {
             userID,
