@@ -91,7 +91,7 @@ class BackupHelper {
             for (let id = startId; id <= maxId; id++) {
                 const url = `${baseURL}/${urlpart}/${id}`
 
-                if (clist.length > maxConcurrent) {
+                if (clist.length >= maxConcurrent) {
                     const results = await Promise.all(clist.map(f => f()))
                     clist = []
 
