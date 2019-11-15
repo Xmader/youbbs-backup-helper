@@ -91,16 +91,6 @@ class BackupHelper {
             for (let id = startId; id <= maxId; id++) {
                 const url = `${baseURL}/${urlpart}/${id}`
 
-                if (clist.length >= maxConcurrent) {
-                    const results = await Promise.all(clist.map(f => f()))
-                    clist = []
-
-                    const ends = results.some((x) => x)
-                    if (ends) {
-                        break
-                    }
-                }
-
                 clist.push(async () => {
                     console.log(url, "processing")
 
@@ -135,9 +125,21 @@ class BackupHelper {
                     }
                 })
 
+                if (clist.length >= maxConcurrent) {
+                    const results = await Promise.all(clist.map(f => f()))
+                    clist = []
+
+                    const ends = results.some((x) => x)
+                    if (ends) {
+                        break
+                    }
+                }
+
             }
 
-            await Promise.all(clist.map(f => f()))
+            if (clist.length > 0) {
+                await Promise.all(clist.map(f => f()))
+            }
         }
     }
 
