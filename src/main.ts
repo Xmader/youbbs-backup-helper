@@ -98,17 +98,19 @@ class BackupHelper {
                         const r = await fetchMainContent(url, { timeout: 5 * 1000 })
                         let pageObj = await parser.parse(r)
 
+                        for (const pipeFn of this.pipeFnList) {
+                            if (pipeFn && typeof pipeFn == "function") {
+                                pageObj = await pipeFn(pageObj)
+                            }
+                        }
+
+                        const output = serializerFn(pageObj)
+
                         let fileName = `${id}.${fileExt}`
                         if (this.fileNameFn && typeof this.fileNameFn == "function") {
                             fileName = await this.fileNameFn(pageObj, id, fileExt)
                         }
                         const outputPath = joinPaths(outputDir, type, fileName)
-
-                        for (const pipeFn of this.pipeFnList) {
-                            pageObj = await pipeFn(pageObj)
-                        }
-
-                        const output = serializerFn(pageObj)
 
                         await ensureDir(dirname(outputPath))
                         await writeFile(outputPath, output)
