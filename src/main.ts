@@ -19,6 +19,9 @@ const TypeUrlParts: { [type in BackupType]: string } = {
     category: "n",
 }
 
+const Cookie = process.env.COOKIE
+const headers = Cookie ? { Cookie } : undefined
+
 type PipeFn = (obj: PageObj) => PageObj | Promise<PageObj>
 
 type FileNameFn = (obj?: PageObj, id?: number, fileExt?: string) => string | Promise<string>
@@ -95,7 +98,10 @@ class BackupHelper {
                     console.log(url, "processing")
 
                     try {
-                        const r = await fetchMainContent(url, { timeout: 5 * 1000 })
+                        const r = await fetchMainContent(url, { 
+                            timeout: 5 * 1000,
+                            headers: headers,
+                        })
                         let pageObj = await parser.parse(r)
 
                         for (const pipeFn of this.pipeFnList) {
