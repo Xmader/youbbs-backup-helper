@@ -92,7 +92,7 @@ export const ArticlePageParser: MainContentParser<Article> = {
         const linkclickCbScript = [...mainContentElement.querySelectorAll("script")].slice(-1)[0]
         const aid = getIdFromLink(linkclickCbScript.text, "t")
 
-        const categoryA: HTMLAnchorElement = mainContentElement.querySelector(".fs14 > a:nth-child(2)")
+        const categoryA: HTMLAnchorElement = mainContentElement.querySelector(".fs14 > .nav_btn.active")
         const cid = getIdFromLink(categoryA.href, "n")
         // const cName = categoryA.text
 
