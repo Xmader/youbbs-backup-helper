@@ -1,6 +1,8 @@
 
-import fetch, { RequestInfo, RequestInit, Blob } from "node-fetch"
+import fetch, { RequestInfo, RequestInit } from "node-fetch"
 import { JSDOM } from "jsdom"
+
+/// <reference lib="dom" />
 
 const _getEnvSetTimeZone = () => {
     return process && process.env && process.env["YOUBBS_TIMEZONE"]
