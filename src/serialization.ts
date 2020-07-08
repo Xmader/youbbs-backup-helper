@@ -28,6 +28,16 @@ const turndownService = new TurndownService({
         // @ts-ignore
         return node.isBlock ? "\n\n" + node.outerHTML + "\n\n" : node.outerHTML
     },
+    blankReplacement(innerHTML, node: HTMLElement) {
+        if (
+            node.nodeName === "DIV" &&
+            node.classList.contains("videowrapper")
+        ) {
+            return node.outerHTML
+        }
+
+        return ""
+    },
 })
 
 /**

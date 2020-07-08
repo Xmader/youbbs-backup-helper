@@ -19,6 +19,9 @@ const TypeUrlParts: { [type in BackupType]: string } = {
     category: "n",
 }
 
+const Cookie = process.env.COOKIE
+const headers = Cookie ? { Cookie } : undefined
+
 type PipeFn = (obj: PageObj) => PageObj | Promise<PageObj>
 
 type FileNameFn = (obj?: PageObj, id?: number, fileExt?: string) => string | Promise<string>
@@ -91,34 +94,29 @@ class BackupHelper {
             for (let id = startId; id <= maxId; id++) {
                 const url = `${baseURL}/${urlpart}/${id}`
 
-                if (clist.length > maxConcurrent) {
-                    const results = await Promise.all(clist.map(f => f()))
-                    clist = []
-
-                    const ends = results.some((x) => x)
-                    if (ends) {
-                        break
-                    }
-                }
-
                 clist.push(async () => {
                     console.log(url, "processing")
 
                     try {
-                        const r = await fetchMainContent(url)
+                        const r = await fetchMainContent(url, {
+                            timeout: 5 * 1000,
+                            headers: headers,
+                        })
                         let pageObj = await parser.parse(r)
+
+                        for (const pipeFn of this.pipeFnList) {
+                            if (pipeFn && typeof pipeFn == "function") {
+                                pageObj = await pipeFn(pageObj)
+                            }
+                        }
+
+                        const output = serializerFn(pageObj)
 
                         let fileName = `${id}.${fileExt}`
                         if (this.fileNameFn && typeof this.fileNameFn == "function") {
                             fileName = await this.fileNameFn(pageObj, id, fileExt)
                         }
                         const outputPath = joinPaths(outputDir, type, fileName)
-
-                        for (const pipeFn of this.pipeFnList) {
-                            pageObj = await pipeFn(pageObj)
-                        }
-
-                        const output = serializerFn(pageObj)
 
                         await ensureDir(dirname(outputPath))
                         await writeFile(outputPath, output)
@@ -135,9 +133,21 @@ class BackupHelper {
                     }
                 })
 
+                if (clist.length >= maxConcurrent) {
+                    const results = await Promise.all(clist.map(f => f()))
+                    clist = []
+
+                    const ends = results.some((x) => x)
+                    if (ends) {
+                        break
+                    }
+                }
+
             }
 
-            await Promise.all(clist.map(f => f()))
+            if (clist.length > 0) {
+                await Promise.all(clist.map(f => f()))
+            }
         }
     }
 

@@ -2,7 +2,7 @@
 import { Parser, MainContentParser, User, Article, Comment, Tag, Category } from "./types"
 import { parseTime, fetchDataURL } from "./utils"
 
-const timeReg = /(\d{4}-\d{2}-\d{2} \d{2}:\d{2})/
+const timeReg = /(\d{4}-\d{2}-\d{2})/
 const userNoReg = /第(\d+)号会员/
 
 const getUserNo = (str: string) => {
@@ -10,7 +10,7 @@ const getUserNo = (str: string) => {
 }
 
 const getTime = (str: string) => {
-    const timeStr = str.match(timeReg)[1]
+    const timeStr = str.match(timeReg)[1] + " 00:00"
     return parseTime(timeStr)
 }
 
@@ -47,7 +47,7 @@ export const UserPageParser: MainContentParser<User> = {
 
         const baseURLL: HTMLLinkElement = (mainContentElement.getRootNode() as Document).querySelector("link[rel=canonical]")
         const baseURL = baseURLL.href.replace(/\/+$/, "")
-        const avatarDataUrl = await fetchDataURL(baseURL + avatarUrl)
+        const avatarDataUrl = await fetchDataURL(baseURL + avatarUrl, { timeout: 5 * 1000 })
 
         return {
             userID,
@@ -92,7 +92,7 @@ export const ArticlePageParser: MainContentParser<Article> = {
         const linkclickCbScript = [...mainContentElement.querySelectorAll("script")].slice(-1)[0]
         const aid = getIdFromLink(linkclickCbScript.text, "t")
 
-        const categoryA: HTMLAnchorElement = mainContentElement.querySelector(".fs14 > a:nth-child(2)")
+        const categoryA: HTMLAnchorElement = mainContentElement.querySelector(".fs14 > .nav_btn.active")
         const cid = getIdFromLink(categoryA.href, "n")
         // const cName = categoryA.text
 
